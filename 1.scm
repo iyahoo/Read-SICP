@@ -12,7 +12,7 @@
 ;; 演習 1.2
 (define 1-2 (/ (+ 4 5 (- 2 (- 3 (+ 6 (/ 4 5))))) (* (- 2 7) (- 6 2) 3)))
 
-;; 演習 1.3 
+;; 演習 1.3
 (define (big2 a b c)
   (cond ((<= a b c) (+ (square b) (square c)))
         ((<= b a c)) (+ (square a) (square c))
