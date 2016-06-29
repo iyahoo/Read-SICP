@@ -33,18 +33,18 @@
 
 ;; 1.1.7
 
-(define (sqrt- x)
-  (define (sqrt-iter guess x)
-    (if (good-enough? guess x)
-        guess
-        (sqrt-iter (improve guess x) x)))  
-  (define (improve guess)
-    (average guess (/ x guess)))
-  (define (average x y)
-    (/ (+ x y) 2))
-  (define (good-enough? guess x)
-    (< (abs (- (square guess) x)) 0.001))
-  (sqrt-iter 1.0 x))
+;; (define (sqrt- x)
+;;   (define (sqrt-iter guess x)
+;;     (if (good-enough? guess x)
+;;         guess
+;;         (sqrt-iter (improve guess x) x)))
+;;   (define (improve guess)
+;;     (average guess (/ x guess)))
+;;   (define (average x y)
+;;     (/ (+ x y) 2))
+;;   (define (good-enough? guess x)
+;;     (< (abs (- (square guess) x)) 0.001))
+;;   (sqrt-iter 1.0 x))
 
 (define (test-sqrt x)
   (list (sqrt x) (sqrt- x)))
@@ -65,8 +65,28 @@
       guess
       (1-8-sqrt-iter (1-8-improve guess x) x)))
 
-(define (1-8-cube-root x)  
+(define (1-8-cube-root x)
   (1-8-sqrt-iter 1.0 x))
+
+;; 演習 1.9
+
+(define (inc x)
+  (+ x 1))
+
+(define (dec x)
+  (- x 1))
+
+(define (plus1 a b)
+  (if (= a 0)
+      b
+      (inc (plus1 (dec a) b))))
+
+(define (plus2 a b)
+  (if (= a 0)
+      b
+      (plus2 (dec a) (inc b))))
+
+
 
 ;; 1.2.2
 
@@ -94,20 +114,11 @@
 ;; 金種 = 2
 
 (define (count-change2 amount)
-  (cc2 amount 2))
+  (cc amount 2))
 
-(define (cc2 amount kinds-of-coins)
-  (cond ((= amount 0) 1)
-        ((or (< amount 0) (= kinds-of-coins 0)) 0)
-        (else (+ (cc2 amount
-                      (- kinds-of-coins 1))
-                 (cc2 (- amount
-                         (first-denomination2 kinds-of-coins))
-                      kinds-of-coins)))))
+;; 反復プロセスにするために
+;; 下から行く
 
-(define (first-denomination2 kinds-of-coins)
-  (cond ((= kinds-of-coins 1) 1)
-        ((= kinds-of-coins 2) 5)))
 
 ;; 1.2.4
 
@@ -115,4 +126,3 @@
   (cond ((= n 0) 1)
         ((even? n) (square (fast-expt b (/ n 2))))
         (else (* b ( fast-expt b (- n 1))))))
-
