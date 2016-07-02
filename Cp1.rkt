@@ -9,7 +9,7 @@
 (define (sum-of-squares x y)
   (+ (square x) (square y)))
 
-;; 演習 1.2
+;; 練習問題 1.2
 (define 1-2 (/ (+ 4 5 (- 2
                          (- 3
                             (+ 6
@@ -18,17 +18,17 @@
                   (- 6 2)
                   3)))
 
-;; 演習 1.3
+;; 練習問題 1.3
 (define (1-3 a b c)
   (cond ((<= a b c) (sum-of-squares b c))
         ((<= b a c) (sum-of-squares a c))
         (else (sum-of-squares a b))))
 
-;; 演習 1.4
+;; 練習問題 1.4
 (define (a-plus-abs-b a b)
   ((if (> b 0) + -) a b))
 
-;; 演習 1.5
+;; 練習問題 1.5
 ;; (define (p) (p))
 
 ;; 1.1.7
@@ -49,7 +49,7 @@
 (define (test-sqrt x)
   (list (sqrt x) (sqrt- x)))
 
-;; 演習 1.8
+;; 練習問題 1.8
 
 (define (cube x)
   (* x x x))
@@ -68,7 +68,7 @@
 (define (1-8-cube-root x)
   (1-8-sqrt-iter 1.0 x))
 
-;; 演習 1.9
+;; 練習問題 1.9
 
 (define (inc x)
   (+ x 1))
@@ -86,7 +86,28 @@
       b
       (plus2 (dec a) (inc b))))
 
+;; 練習問題 1.10 (n が整数)
 
+(define (A x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (A (- x 1) (A x (- y 1))))))
+
+(define (f n)
+  (A 0 n))
+
+;; 2n 
+
+(define (g n)
+  (A 1 0))
+
+;; 2^n (n >= 0)
+
+(define (h n)
+  (A 2 0))
+
+;; h(n) = 2^h(n-1) (h(1) = 2)
 
 ;; 1.2.2
 
@@ -119,6 +140,22 @@
 ;; 反復プロセスにするために
 ;; 下から行く
 
+
+;; 練習問題 1.11
+;; f(n) = (f(n-1) + 2*f(n-2) + 3*f(n-3))
+;;        (n (n < 3))
+
+
+
+(define (f n)
+  (f-rec 2 1 0 n))
+
+(define (f-rec a b c n)
+  (cond ((= 0 n) c)
+        (else (f-rec (+ a (* 2 b) (* 3 c))
+                     a
+                     b
+                     (- n 1)))))
 
 ;; 1.2.4
 
