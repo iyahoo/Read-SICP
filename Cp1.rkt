@@ -97,17 +97,17 @@
 (define (f n)
   (A 0 n))
 
-;; 2n 
+;;;; 2n 
 
 (define (g n)
   (A 1 0))
 
-;; 2^n (n >= 0)
+;;;; 2^n (n >= 0)
 
 (define (h n)
   (A 2 0))
 
-;; h(n) = 2^h(n-1) (h(1) = 2)
+;;;; h(n) = 2^h(n-1) (h(1) = 2)
 
 ;; 1.2.2
 
@@ -156,6 +156,14 @@
                      a
                      b
                      (- n 1)))))
+
+;; 練習問題 1.12
+
+(define (pascal-triangle row col)
+  (cond ((= col 1) 1)
+        ((= row col) 1)
+        (else (+ (pascal-triangle (- row 1) col)
+                 (pascal-triangle (- row 1) (- col 1))))))
 
 ;; 1.2.4
 
