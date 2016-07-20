@@ -2,8 +2,6 @@
 
 (define my-list (lambda a a))
 
-(define (uuu x) (* x x))
-
 (define (square x) (* x x))
 
 (define (sum-of-squares x y)
@@ -138,14 +136,11 @@
   (cc amount 2))
 
 ;; 反復プロセスにするために
-;; 下から行く
-
+;; 下から行く?
 
 ;; 練習問題 1.11
 ;; f(n) = (f(n-1) + 2*f(n-2) + 3*f(n-3))
 ;;        (n (n < 3))
-
-
 
 (define (f n)
   (f-rec 2 1 0 n))
@@ -170,4 +165,11 @@
 (define (fast-expt b n)
   (cond ((= n 0) 1)
         ((even? n) (square (fast-expt b (/ n 2))))
-        (else (* b ( fast-expt b (- n 1))))))
+        (else (* b (fast-expt b (- n 1))))))
+
+;; 1.2.5
+
+(define (as/gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
