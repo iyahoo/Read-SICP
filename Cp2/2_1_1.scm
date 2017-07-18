@@ -98,12 +98,57 @@
     (* (points-diff point-x sp ep) (points-diff point-y sp ep))))
 
 
-(test-section "test code")
+(test-section "test 2.3")
 (test "points-diff" 6
       (^[] (points-diff point-x (make-point 5 0) (make-point -1 0))))
 
 (test "periphery" 6
       (^[] (periphery (make-rec (make-point 0 2) (make-point 1 0)))))
 
-(test "area " 2
+(test "area" 2
       (^[] (area (make-rec (make-point 0 2) (make-point 1 0)))))
+
+
+;; 2.4
+
+(define (cons- x y)
+  (define (dispatch m)
+    (cond ((= m 0) x)
+          ((= m 1) y)
+          (else (error "Argument not 0 or 1: CONS" m))))
+  dispatch)
+
+;; (define (cons- x y)
+;;   (lambda (m)
+;;     (cond ((= m 0) x)
+;;           ((= m 1) y)
+;;           (else (error "Argument not 0 or 1: CONS" m)))))
+
+(define (cons- x y)
+  (lambda (m) (m x y)))
+
+(define (car- z)
+  (z (lambda (p q) p)))
+
+(define (cdr- z)
+  (z (lambda (p q) q)))
+
+
+;; 2.5
+
+(define (cons- x y)
+  (* (expt 2 x) (expt 3 y)))
+
+(define (car-cdr pair base)
+  (let loop [(pair pair) (count 0)]
+    (if (= (modulo pair base) 0)
+        (loop (/ pair base) (+ count 1))
+        count)))
+
+(define (car- pair)
+  (car-cdr pair 2))
+
+(define (cdr- pair)
+  (car-cdr pair 3))
+
+
