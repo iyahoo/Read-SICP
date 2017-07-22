@@ -118,19 +118,19 @@
           (else (error "Argument not 0 or 1: CONS" m))))
   dispatch)
 
-;; (define (cons- x y)
-;;   (lambda (m)
-;;     (cond ((= m 0) x)
-;;           ((= m 1) y)
-;;           (else (error "Argument not 0 or 1: CONS" m)))))
-
 (define (cons- x y)
+  (lambda (m)
+    (cond ((equal? m :car) x)
+          ((equal? m :cdr) y)
+          (else (error "Argument not 0 or 1: CONS" m)))))
+
+(define (cons-- x y)
   (lambda (m) (m x y)))
 
-(define (car- z)
+(define (car-- z)
   (z (lambda (p q) p)))
 
-(define (cdr- z)
+(define (cdr-- z)
   (z (lambda (p q) q)))
 
 
@@ -151,4 +151,78 @@
 (define (cdr- pair)
   (car-cdr pair 3))
 
+
+;; 2.6
+
+(define zero
+  (lambda (f) (lambda (x) x)))
+
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+
+(define one
+  (lambda (f) (lambda (x) (f x))))
+
+(define two
+  (lambda (f) (lambda (x) (f (f x)))))
+
+(define three
+  (lambda (f) (lambda (x) (f (f (f x))))))
+
+(define (plus p q)
+  (lambda (f) (lambda (x) ((p f) ((q f) x)))))
+
+(define (inc x)
+  (+ 1 x))
+
+(test-section "practice 2.6")
+
+(test "zero" 0
+      (^[] ((zero inc) 0)))
+
+(test "one" 1
+      (^[] ((one inc) 0)))
+
+(test "two" 2
+      (^[] ((two inc) 0)))
+
+(test "add-1" 3
+      (^[] (((add-1 (add-1 one)) inc) 0)))
+
+(test "plus" 3
+      (^[] (((plus two one) inc) 0)))
+
+(test "plus" 5
+      (^[] (((plus two three) inc) 0)))
+
+;; 2.1.4
+
+(define (add-interval x y)
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+
+(define (mul-interval x y)
+  (let ((p1 (* (lower-bound x) (lower-bound y)))
+        (p2 (* (lower-bound x) (upper-bound y)))
+        (p3 (* (upper-bound x) (lower-bound y)))
+        (p4 (* (upper-bound x) (upper-bound y))))
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+
+(define (div-interval x y)
+  (mul-interval
+   x
+   (make-interval (/ 1.0 (upper-bound y))
+                  (/ 1.0 (lower-bound y)))))
+
+;; 練習 x2.7
+
+(define (make-interval a b)
+  (cons a b))
+
+(define (upper-bound interval)
+  (max (car interval) (cdr interval)))
+
+(define (lower-bound interval)
+  (min (car interval) (cdr interval)))
 
