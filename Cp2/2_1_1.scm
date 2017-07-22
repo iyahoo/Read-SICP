@@ -1,6 +1,5 @@
 (use gauche.test)
 
-
 (define (add-rat x y)
   (make-rat (+ (* (numer x) (denom y))
                (* (numer y) (denom x)))
@@ -215,7 +214,7 @@
    (make-interval (/ 1.0 (upper-bound y))
                   (/ 1.0 (lower-bound y)))))
 
-;; 練習 x2.7
+;; 練習 2.7
 
 (define (make-interval a b)
   (cons a b))
@@ -225,4 +224,24 @@
 
 (define (lower-bound interval)
   (min (car interval) (cdr interval)))
+
+;; 練習問題 2.8
+
+(define (sub-interval x y)
+  (make-interval (- (upper-bound x) (lower-bound y))
+                 (- (lower-bound x) (upper-bound y))))
+
+(test-section "practice 2.8")
+
+(test "sub-interval"
+      (cons 8 -2)
+      (^[] (sub-interval (make-interval 10 3)
+                         (make-interval 5 2))))
+
+(test "sub-interval"
+      '(100 . 0)
+      (^[] (sub-
+            interval (make-interval 100 25)
+                         (make-interval 25 0))))
+
 
