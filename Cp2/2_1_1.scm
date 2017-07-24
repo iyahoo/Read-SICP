@@ -212,7 +212,7 @@
   (mul-interval
    x
    (make-interval (/ 1.0 (upper-bound y))
-                  (/ 1.0 (lower-bound y)))))
+                   (/ 1.0 (lower-bound y)))))
 
 ;; 練習 2.7
 
@@ -240,8 +240,20 @@
 
 (test "sub-interval"
       '(100 . 0)
-      (^[] (sub-
-            interval (make-interval 100 25)
+      (^[] (sub-interval (make-interval 100 25)
                          (make-interval 25 0))))
 
+;; 2.9 slack
 
+;; 2.10
+;; 何故 0 を跨ぐとだめなのかがわからない
+;; 0 を含む場所で除算する場合、 0 は計算不可能な上、その周辺な値が最大にならなければないらないが、具体的な値は決定不可能
+;;
+
+(define (div-interval x y)
+  (mul-interval
+   x
+   (if (>= (* (upper-bound y) (lower-bound y)) 0)
+       (make-interval (/ 1.0 (upper-bound y))
+                      (/ 1.0 (lower-bound y)))
+       (error "ゼロを跨ぐ区間です"))))
