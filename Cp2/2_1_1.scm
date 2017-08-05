@@ -174,6 +174,7 @@
 (define (inc x)
   (+ 1 x))
 
+
 (test-section "practice 2.6")
 
 (test "zero" 0
@@ -194,66 +195,9 @@
 (test "plus" 5
       (^[] (((plus two three) inc) 0)))
 
-;; 2.1.4
+(define (next-char x)
+  (integer->char (+ (char->integer x) 1)))
 
-(define (add-interval x y)
-  (make-interval (+ (lower-bound x) (lower-bound y))
-                 (+ (upper-bound x) (upper-bound y))))
+(test "character-church" #\d
+      (^[] (((add-1 two) next-char) #\a)))
 
-(define (mul-interval x y)
-  (let ((p1 (* (lower-bound x) (lower-bound y)))
-        (p2 (* (lower-bound x) (upper-bound y)))
-        (p3 (* (upper-bound x) (lower-bound y)))
-        (p4 (* (upper-bound x) (upper-bound y))))
-    (make-interval (min p1 p2 p3 p4)
-                   (max p1 p2 p3 p4))))
-
-(define (div-interval x y)
-  (mul-interval
-   x
-   (make-interval (/ 1.0 (upper-bound y))
-                   (/ 1.0 (lower-bound y)))))
-
-;; 練習 2.7
-
-(define (make-interval a b)
-  (cons a b))
-
-(define (upper-bound interval)
-  (max (car interval) (cdr interval)))
-
-(define (lower-bound interval)
-  (min (car interval) (cdr interval)))
-
-;; 練習問題 2.8
-
-(define (sub-interval x y)
-  (make-interval (- (upper-bound x) (lower-bound y))
-                 (- (lower-bound x) (upper-bound y))))
-
-(test-section "practice 2.8")
-
-(test "sub-interval"
-      (cons 8 -2)
-      (^[] (sub-interval (make-interval 10 3)
-                         (make-interval 5 2))))
-
-(test "sub-interval"
-      '(100 . 0)
-      (^[] (sub-interval (make-interval 100 25)
-                         (make-interval 25 0))))
-
-;; 2.9 slack
-
-;; 2.10
-;; 何故 0 を跨ぐとだめなのかがわからない
-;; 0 を含む場所で除算する場合、 0 は計算不可能な上、その周辺な値が最大にならなければないらないが、具体的な値は決定不可能
-;;
-
-(define (div-interval x y)
-  (mul-interval
-   x
-   (if (>= (* (upper-bound y) (lower-bound y)) 0)
-       (make-interval (/ 1.0 (upper-bound y))
-                      (/ 1.0 (lower-bound y)))
-       (error "ゼロを跨ぐ区間です"))))
