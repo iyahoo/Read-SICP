@@ -316,3 +316,72 @@
          (mul-interval smaller_zero_0 smaller_zero_1)
          (new-mul-interval smaller_zero_0 smaller_zero_1)))
 
+;; 本文
+
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w)))
+
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i))
+     2))
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+;; 練習問題 2.12
+
+(define (make-center-percent c p)  
+  (let ([error (/ p 100)])
+    (make-interval (- c (* c error)) (+ c (* c error)))))
+
+(test* "make-center-percent: 1"
+       (make-interval 99 101)
+       (make-center-percent 100 1))
+
+(test* "make-center-percent: 2"
+       (make-interval 95 105)
+       (make-center-percent 100 5))
+
+(define (percent i)
+  (let* [(c (center i))
+         (ub (upper-bound i))]
+    (* (- (/ ub c) 1) 100)))
+
+(define (percent b)
+  (* (/ (width b) (center b)) 100))
+
+(test* "percent: 1"
+       5
+       (percent (make-center-percent 100 5)))
+
+(test* "percent: 2"
+       1
+       (percent (make-center-percent 100 1)))
+
+(test* "percent: 3"
+       100
+       (percent (make-center-percent 100 100)))
+
+(test* "percent: 4"
+       0.1
+       (percent (make-center-percent 100 0.1)))
+
+;; 2.13
+
+;; B1 -> a +- b%, 0<=b<=1, [a*(1-b), a*(1+b)]
+;; B2 -> c +- d%, 0<=d<=1, [c*(1-d), c*(1+d)]
+
+;; B1 * B2 = [ac*(1-b)(1-d), ac*(1+b)(1+d)]
+
+;;   ac*(1-b)(1-d)
+;; = ac*(1 - (b+d) + bd) then bd is 0
+;; = ac*(1 - (b+d))
+
+;;   ac*(1+b)(1+d)
+;; = ac*(1 + (b+d) + bd) then bd is 0
+;; = ac*(1 + (b+d))
+
+;; B1 * B2 = [ac(1-(b+d)), ac*(1+(b+d))]
+;; center:  ac
+;; width: (b+d)
+;; percent: (b+d)/ac
