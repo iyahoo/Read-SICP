@@ -72,6 +72,8 @@
                       (/ 1.0 (lower-bound y)))
        (error "ゼロを跨ぐ区間です"))))
 
+;; 2.11
+
 (define (interval-type int)
   (cond [(and (> (lower-bound int) 0) (> (upper-bound int) 0))
          :positive]
@@ -97,16 +99,6 @@
 (test* "interval-type4"
        :include-0
        (interval-type (make-interval 0 1)))
-
-(define-syntax three-type-interval-calc
-  (syntax-rules ()
-    ((_ type positive include-0 negative)
-     (cond [(equal? type :positive)
-            positive]
-           [(equal? type :include-0)
-            include-0]
-           [(equal? type :negative)
-            negative]))))
 
 (define (new-mul-interval x y)
   (let ([x-type (interval-type x)]
@@ -146,35 +138,53 @@
                   (make-interval (* (upper-bound x) (upper-bound y))
                                  (* (lower-bound x) (lower-bound y)))])])))
 
+(define-syntax match-interval-type
+  (syntax-rules ()
+    ((_ target (type1 case1) (type2 case2) (type3 case3))
+     (let ([target-type (interval-type target)])
+       (cond [(equal? target-type type1)
+              case1]
+             [(equal? target-type type2)
+              case2]
+             [(equal? target-type type3)
+              case3])))))
+
 (define (new-mul-interval x y)
-  (let ([x-type (interval-type x)]
-        [y-type (interval-type y)])
-    (three-type-interval-calc x-type
-      (three-type-interval-calc y-type
-        (make-interval (* (lower-bound x) (lower-bound y))
-                       (* (upper-bound x) (upper-bound y)))
-        (make-interval (* (upper-bound x) (lower-bound y))
-                       (* (upper-bound x) (upper-bound y)))
-        (make-interval (* (upper-bound x) (lower-bound y))
-                       (* (lower-bound x) (upper-bound y))))
-      (three-type-interval-calc y-type
-         (make-interval (* (lower-bound x) (upper-bound y))
-                        (* (upper-bound x) (upper-bound y)))
-         (let ((p1 (* (lower-bound x) (lower-bound y)))
-               (p2 (* (lower-bound x) (upper-bound y)))
-               (p3 (* (upper-bound x) (lower-bound y)))
-               (p4 (* (upper-bound x) (upper-bound y))))
-           (make-interval (min p2 p3)
-                          (max p1 p4)))
-         (make-interval (* (upper-bound x) (lower-bound y))
-                        (* (lower-bound x) (lower-bound y))))
-      (three-type-interval-calc y-type
-        (make-interval (* (lower-bound x) (upper-bound y))
-                       (* (upper-bound x) (lower-bound y)))
-        (make-interval (* (lower-bound x) (upper-bound y))
-                       (* (lower-bound x) (lower-bound y)))
-        (make-interval (* (upper-bound x) (upper-bound y))
-                       (* (lower-bound x) (lower-bound y)))))))
+  (match-interval-type x
+    [:positive (match-interval-type y
+                 [:positive
+                  (make-interval (* (lower-bound x) (lower-bound y))
+                                 (* (upper-bound x) (upper-bound y)))]
+                 [:include-0
+                  (make-interval (* (upper-bound x) (lower-bound y))
+                                 (* (upper-bound x) (upper-bound y)))]
+                 [:negative
+                  (make-interval (* (upper-bound x) (lower-bound y))
+                                 (* (lower-bound x) (upper-bound y)))])]
+    [:include-0 (match-interval-type y
+                  [:positive
+                   (make-interval (* (lower-bound x) (upper-bound y))
+                                  (* (upper-bound x) (upper-bound y)))]
+                  [:include-0
+                   (let ((p1 (* (lower-bound x) (lower-bound y)))
+                         (p2 (* (lower-bound x) (upper-bound y)))
+                         (p3 (* (upper-bound x) (lower-bound y)))
+                         (p4 (* (upper-bound x) (upper-bound y))))
+                     (make-interval (min p2 p3)
+                                    (max p1 p4)))]
+                  [:negative
+                   (make-interval (* (upper-bound x) (lower-bound y))
+                                  (* (lower-bound x) (lower-bound y)))])]
+    [:negative (match-interval-type y
+                 [:positive
+                  (make-interval (* (lower-bound x) (upper-bound y))
+                                 (* (upper-bound x) (lower-bound y)))]
+                 [:include-0
+                  (make-interval (* (lower-bound x) (upper-bound y))
+                                 (* (lower-bound x) (lower-bound y)))]
+                 [:negative
+                  (make-interval (* (upper-bound x) (upper-bound y))
+                                 (* (lower-bound x) (lower-bound y)))])]))
 
 (test-section "x+y+")
 (test* "mul-interval"
@@ -254,14 +264,12 @@
        (make-interval -10 10)
        (new-mul-interval (make-interval -5 5) (make-interval -2 -1)))
 
-(let
-    ([larger_zero_0 (make-interval 2 1)]
-     [larger_zero_1 (make-interval 3 2)]
-     [across_zero_0 (make-interval 2 -1)]
-     [across_zero_1 (make-interval 3 -2)]
-     [smaller_zero_0 (make-interval -3 -2)]
-     [smaller_zero_1 (make-interval -4 -1)]
-     )
+(let ([larger_zero_0 (make-interval 2 1)]
+      [larger_zero_1 (make-interval 3 2)]
+      [across_zero_0 (make-interval 2 -1)]
+      [across_zero_1 (make-interval 3 -2)]
+      [smaller_zero_0 (make-interval -3 -2)]
+      [smaller_zero_1 (make-interval -4 -1)])
   (test* "x.l > 0 and y.l > 0"
          (mul-interval larger_zero_0 larger_zero_1)
          (new-mul-interval larger_zero_0 larger_zero_1))
@@ -307,3 +315,4 @@
   (test* "x.u < 0 and y.u < 0"
          (mul-interval smaller_zero_0 smaller_zero_1)
          (new-mul-interval smaller_zero_0 smaller_zero_1)))
+
