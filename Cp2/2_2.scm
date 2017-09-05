@@ -130,4 +130,25 @@
 (test* "" (list 1 4 9) (square-list2 '(1 2 3)))
 (test* "" (list 1 1 1) (square-list2 '(1 1 1)))
 
+;; 練習問題 2.22
+
+;; (define (square-list items)
+;;   (define (iter things answer)
+;;     (if (null? things)
+;;         answer
+;;         (iter (cdr things) (cons (square (car things)) answer))))
+;;   (iter items nil))
+
+;; nil に対して items の先頭から順に計算した結果を cons しているので、結果は逆になってしまう。
+;; というのは answer の変化は nil -> (1) -> (4 1) となるからである。
+
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+        answer
+        (iter (cdr things) (cons answer (square (car things))))))
+  (iter items '()))
+
+;; こちらも answer の変化の推移を追っていくとわかるが、nil -> (nil . 1) -> ((nil . 1) . 4) というようになるためである。
+
 
