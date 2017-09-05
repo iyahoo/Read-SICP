@@ -49,7 +49,7 @@
       (flatten (my-reverse (cdr items)) (car items))))
 
 (test* "" '(1) (my-reverse '(1)))
-(test* "" '(2) (my-reverse '(1)))
+(test* "" '(2 1) (my-reverse '(1 2)))
 (test* "" '(3 2 1) (my-reverse '(1 2 3)))
 
 ;; 練習問題 2.19
@@ -209,7 +209,7 @@
   (define (%reverse lis acm)
     (if (null? lis)
         acm
-        (%reverse (cdr lis) (cons (car lis) acm))))  
+        (%reverse (cdr lis) (cons (car lis) acm))))
   (if (not (pair? lis))
       lis
       (map deep-reverse (%reverse lis '()))))
@@ -242,5 +242,153 @@
 (test* "" '(1 2 3 4 5) (fringe '((1) (2) (3) (4) (5))))
 (test* "" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
 (test* "" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
+
+;; 練習問題 2.29
+
+(define (make-mobile left right)
+  (list left right))
+
+(define (make-branch length structure)
+  (list length structure))
+
+(define (left-branch mobile)
+  (car mobile))
+
+(define (right-branch mobile)
+  (cadr mobile))
+
+(define (branch-length branch)
+  (car branch))
+
+(define (branch-structure branch)
+  (cadr branch))
+
+;; b
+
+(define (total-weight mobile)
+  (if (pair? mobile)
+      (+ (total-weight (branch-structure (left-branch mobile)))
+         (total-weight (branch-structure (right-branch mobile))))
+      mobile))
+
+;; c
+
+(define (get-torque branch)
+  (* (branch-length branch) (total-weight (branch-structure branch))))
+
+(define (balanced? mobile)
+  (= (get-torque (left-branch mobile)) (get-torque (right-branch mobile))))
+
+;; d
+;; 以下のように関数を変えてもテストはうまくいくので大丈夫っぽい
+
+;; (define (make-mobile left right)
+;;   (cons left right))
+
+;; (define (make-branch length structure)
+;;   (cons length structure))
+
+;; (define (right-branch mobile)
+;;   (cdr mobile))
+
+;; (define (branch-structure branch)
+;;   (cdr branch))
+
+(test-section "2.29")
+
+(test* "left-branch" '(1 2 3) (left-branch (make-mobile '(1 2 3) '(4 5 6))))
+(test* "right-branch" '(4 5 6) (right-branch (make-mobile '(1 2 3) '(4 5 6))))
+
+(test* "branch-length" 3 (branch-length (make-branch 3 '(4 5 6))))
+(test* "branch-structure" '(4 5 6) (branch-structure (make-branch 3 '(4 5 6))))
+
+(test* "total-weight" 5
+       (total-weight (make-mobile (make-branch 2 2) (make-branch 3 3))))
+
+(test* "total-weight" 7
+       (total-weight (make-mobile (make-branch 2
+                                               (make-mobile (make-branch 1 2)
+                                                            (make-branch 1 2)))
+                                  (make-branch 3 3))))
+
+(test* "total-weight"
+       15
+       (total-weight (make-mobile
+                      (make-branch 3
+                                   (make-mobile
+                                    (make-branch 2 5)
+                                    (make-branch 1 5)))
+                      (make-branch 3 5))))
+
+(test* "get-torque"
+       35
+       (get-torque (make-mobile 7
+                                (make-mobile
+                                 (make-branch 2 2)
+                                 (make-branch 3 3)))))
+
+(test* "get-torque"
+       14
+       (get-torque (make-branch 2
+                                (make-mobile
+                                 (make-branch 2
+                                              (make-mobile
+                                               (make-branch 1 2)
+                                               (make-branch 1 2)))
+                                 (make-branch 3 3)))))
+
+(test* "get-torque"
+       45
+       (get-torque (make-branch 3
+                                (make-mobile
+                                 (make-branch 3
+                                              (make-mobile
+                                               (make-branch 2 5)
+                                               (make-branch 1 5)))
+                                 (make-branch 3 5)))))
+
+(test* "balanced?"
+       #t
+       (balanced?
+        (make-mobile
+         (make-branch 3
+                      (make-mobile
+                       (make-branch 3
+                                    (make-mobile
+                                     (make-branch 2 5)
+                                     (make-branch 1 5)))
+                       (make-branch 3 5)))
+         (make-mobile 9
+                      (make-mobile
+                       (make-branch 2 2)
+                       (make-branch 3 3))))))
+
+(test* "balanced?"
+       #f
+       (balanced?
+        (make-mobile
+         (make-branch 3
+                      (make-mobile
+                       (make-branch 3
+                                    (make-mobile
+                                     (make-branch 2 5)
+                                     (make-branch 1 5)))
+                       (make-branch 3 5)))
+         (make-mobile 4
+                      (make-mobile
+                       (make-branch 2 2)
+                       (make-branch 3 3))))))
+
+(define test-b
+  (make-mobile
+   (make-branch 3 6)
+   (make-branch 2
+                (make-mobile
+                 (make-branch 1 4)
+                 (make-branch 1 5)))))
+
+(test* "check-balanced"
+       #t
+       (balanced? test-b))
 
 
