@@ -142,13 +142,30 @@
 ;; nil に対して items の先頭から順に計算した結果を cons しているので、結果は逆になってしまう。
 ;; というのは answer の変化は nil -> (1) -> (4 1) となるからである。
 
-(define (square-list items)
+;; (define (square-list items)
+;;   (define (iter things answer)
+;;     (if (null? things)
+;;         answer
+;;         (iter (cdr things) (cons answer (square (car things))))))
+;;   (iter items '()))
+
+(define (square-list-3 items)
   (define (iter things answer)
     (if (null? things)
         answer
-        (iter (cdr things) (cons answer (square (car things))))))
+        (iter (cdr things) (append answer (list (square (car things)))))))
   (iter items '()))
 
 ;; こちらも answer の変化の推移を追っていくとわかるが、nil -> (nil . 1) -> ((nil . 1) . 4) というようになるためである。
+
+;; 練習問題 2.23
+
+(define (my-for-each proc lis)
+  (define (proc-iter l)
+    (proc (car l))
+    (my-for-each proc (cdr l)))
+  (if (null? lis)
+      1
+      (proc-iter lis)))
 
 
