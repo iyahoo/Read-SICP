@@ -187,81 +187,51 @@
                                  (* (lower-bound x) (lower-bound y)))])]))
 
 (test-section "x+y+")
-(test* "mul-interval"
-       (make-interval 1 5)
-       (mul-interval (make-interval 1 5) (make-interval 1 1)))
 (test* "new-mul-interval"
-       (make-interval 1 5)
+       (mul-interval (make-interval 1 5) (make-interval 1 1))
        (new-mul-interval (make-interval 1 5) (make-interval 1 1)))
 
 (test-section "x+y-")
-(test* "mul-interval"
-       (make-interval 1 5)
-       (mul-interval (make-interval 1 5) (make-interval 1 1)))
 (test* "new-mul-interval"
-       (make-interval 1 5)
+       (mul-interval (make-interval 1 5) (make-interval 1 1))
        (new-mul-interval (make-interval 1 5) (make-interval 1 1)))
 
 (test-section "x+y+-")
-(test* "mul-interval"
-       (make-interval -5 5)
-       (mul-interval (make-interval 1 5) (make-interval -1 1)))
 (test* "new-mul-interval"
-       (make-interval -5 5)
+       (mul-interval (make-interval 1 5) (make-interval -1 1))
        (new-mul-interval (make-interval 1 5) (make-interval -1 1)))
 
 (test-section "x-y+")
-(test* "mul-interval"
-       (make-interval -10 -1)
-       (mul-interval (make-interval -5 -1) (make-interval 1 2)))
 (test* "new-mul-interval"
-       (make-interval -10 -1)
+       (mul-interval (make-interval -5 -1) (make-interval 1 2))
        (new-mul-interval (make-interval -5 -1) (make-interval 1 2)))
 
 (test-section "x-y+-")
-(test* "mul-interval"
-       (make-interval -10 5)
-       (mul-interval (make-interval -5 -1) (make-interval -1 2)))
 (test* "new-mul-interval"
-       (make-interval -10 5)
+       (mul-interval (make-interval -5 -1) (make-interval -1 2))
        (new-mul-interval (make-interval -5 -1) (make-interval -1 2)))
 
 (test-section "x-y-")
-(test* "mul-interval"
-       (make-interval 1 10)
-       (mul-interval (make-interval -5 -1) (make-interval -2 -1)))
 (test* "new-mul-interval"
-       (make-interval 1 10)
+       (mul-interval (make-interval -5 -1) (make-interval -2 -1))
        (new-mul-interval (make-interval -5 -1) (make-interval -2 -1)))
 
 (test-section "x+-y+")
-(test* "mul-interval"
-       (make-interval -10 10)
-       (mul-interval (make-interval -5 5) (make-interval 1 2)))
 (test* "new-mul-interval"
-       (make-interval -10 10)
+       (mul-interval (make-interval -5 5) (make-interval 1 2))
        (new-mul-interval (make-interval -5 5) (make-interval 1 2)))
 
 (test-section "x+-y+-")
-(test* "mul-interval"
-       (make-interval 0 5)
-       (mul-interval (make-interval 0 5) (make-interval 0 1)))
 (test* "new-mul-interval"
-       (make-interval 0 5)
+       (mul-interval (make-interval 0 5) (make-interval 0 1))
        (new-mul-interval (make-interval 0 5) (make-interval 0 1)))
-(test* "mul-interval"
-       (make-interval -5 5)
-       (mul-interval (make-interval 1 -1) (make-interval 5 -5)))
 (test* "new-mul-interval"
-       (make-interval -5 5)
+       (mul-interval (make-interval 1 -1) (make-interval 5 -5))
        (new-mul-interval (make-interval 1 -1) (make-interval 5 -5)))
 
 (test-section "x+-y-")
 (test* "mul-interval"
-       (make-interval -10 10)
-       (mul-interval (make-interval -5 5) (make-interval -2 -1)))
-(test* "mul-interval"
-       (make-interval -10 10)
+       (mul-interval (make-interval -5 5) (make-interval -2 -1))
        (new-mul-interval (make-interval -5 5) (make-interval -2 -1)))
 
 (let ([larger_zero_0 (make-interval 2 1)]
@@ -330,9 +300,11 @@
 
 ;; 練習問題 2.12
 
-(define (make-center-percent c p)  
+(define (make-center-percent c p)
   (let ([error (/ p 100)])
     (make-interval (- c (* c error)) (+ c (* c error)))))
+
+
 
 (test* "make-center-percent: 1"
        (make-interval 99 101)
@@ -364,7 +336,9 @@
 
 (test* "percent: 4"
        0.1
-       (percent (make-center-percent 100 0.1)))
+       (percent (make-center-percent 100 0.1))
+       (lambda (expected result)
+         (< (abs (- expected result)) 1.0e-10)))
 
 ;; 2.13
 
@@ -385,3 +359,15 @@
 ;; center:  ac
 ;; width: (b+d)
 ;; percent: (b+d)/ac
+
+;; 練習問題 2.12
+
+(define (par1 r1 r2)
+  (div-interval (mul-interval r1 r2) (add-interval r1 r2)))
+
+(define (par2 r1 r2)
+  (let ((one (make-interval 1 1)))
+    (div-interval one
+                  (add-interval (div-interval one r1) (div-interval one r2)))))
+
+
