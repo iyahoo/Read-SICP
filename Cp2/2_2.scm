@@ -227,4 +227,20 @@
 (test* "" '((2 1)) (deep-reverse '((1 2))))
 (test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
 
-;; 
+;; 練習問題 2.28
+
+(define (fringe tree)
+  (cond ((not (pair? tree))
+         tree)
+        ((not (pair? (car tree)))
+         (cons (car tree) (fringe (cdr tree))))
+        (else (append (fringe (car tree)) (fringe (cdr tree))))))
+
+(test-section "fringe")
+
+(test* "" '(1 2 3 4 5) (fringe '(1 2 (3) 4 5)))
+(test* "" '(1 2 3 4 5) (fringe '((1) (2) (3) (4) (5))))
+(test* "" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
+(test* "" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
+
+
