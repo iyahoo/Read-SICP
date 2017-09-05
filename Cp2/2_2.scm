@@ -196,9 +196,35 @@
 (test* "" '((1 2 3) 4 5 6) (cons x y))
 (test* "" '((1 2 3) (4 5 6)) (list x y))
 
+;; 練習問題 2.27
 
+;; (define (my-reverse lis)
+(define (%reverse lis acm)
+  (if (null? lis)
+      acm
+      (%reverse (cdr lis) (cons (car lis) acm))))
+;;   (%reverse lis (list)))
 
+(define (deep-reverse lis)
+  (define (%reverse lis acm)
+    (if (null? lis)
+        acm
+        (%reverse (cdr lis) (cons (car lis) acm))))  
+  (if (not (pair? lis))
+      lis
+      (map deep-reverse (%reverse lis '()))))
 
+(test-section "2.27")
 
+(test* "" '(1) (deep-reverse '(1)))
+(test* "" '(3 2 1) (deep-reverse '(1 2 3)))
+(test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
+(test* "" '((1 2) ((4 3) (2 1))) (deep-reverse '(((1 2) (3 4)) (2 1))))
 
+(test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
+(test* "" '((4 (3 2)) 1) (deep-reverse '(1 ((2 3) 4))))
 
+(test* "" '((2 1)) (deep-reverse '((1 2))))
+(test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
+
+;; 
