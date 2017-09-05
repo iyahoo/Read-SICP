@@ -168,4 +168,37 @@
       1
       (proc-iter lis)))
 
+(define (count-leaves x)
+  (cond ((null? x) 0)
+        ((not (pair? x)) 1)
+        (else (+ (count-leaves (car x)) (count-leaves (cdr x))))))
+
+;; 練習問題 2.24
+
+(list 1 (list 2 (list 3 4)))
+
+;; 練習問題 2.25
+
+(test-section "2.25")
+
+(test* "" 7 (car (cdaddr '(1 3 (5 7) 9))))
+(test* "" 7 (caar '((7))))
+(test* "" 7 (cadadr (cadadr (cadadr '(1 (2 (3 (4 (5 (6 7))))))))))
+
+;; 練習問題 2.26
+
+(define x (list 1 2 3))
+(define y (list 4 5 6))
+
+(test-section "2.26")
+
+(test* "" '(1 2 3 4 5 6) (append x y))
+(test* "" '((1 2 3) 4 5 6) (cons x y))
+(test* "" '((1 2 3) (4 5 6)) (list x y))
+
+
+
+
+
+
 
