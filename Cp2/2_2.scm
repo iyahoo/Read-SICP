@@ -1,10 +1,18 @@
 (use gauche.test)
 
+(define nil '())
+
 ;; 階層データと閉包性
 
 ;; という意味で使います。それに対して、リスト構造 (list structure) という用語は、リス トに限らず、ペアによって作られた任意のデータ構造を指します。
 ;;
 ;; (Page 106).
+
+;; (define (my-list . elems)
+;;   (let loop [(elems elems) (lst '())]
+;;     (if (null? elems)
+;;         (reverse lst)
+;;         (loop (cdr elems) (cons (car elems) lst)))))
 
 (define (append- list1 list2)
   (if (null? list1)
@@ -14,9 +22,10 @@
 ;; 練習問題 2.17
 
 (define (last-pair lis)
-  (if (null? (cdr lis))
-      lis
-      (last-pair (cdr lis))))
+  (let ([cdr-lis (cdr lis)])
+    (if (null? cdr-lis)
+        lis
+        (last-pair cdr-lis))))
 
 (test-section "last-pair")
 
@@ -25,19 +34,18 @@
 
 ;; 練習問題 2.18
 
-(define (%reverse lis acm)
-  (if (null? lis)
-      acm
-      (%reverse (cdr lis) (cons (car lis) acm))))
+(define (my-reverse lis)
+  (define (%reverse lis acm)
+    (if (null? lis)
+        acm
+        (%reverse (cdr lis) (cons (car lis) acm))))
+  (%reverse lis nil))
 
-(define (reverse- lis)
-  (%reverse lis (list)))
+(test-section "my-reverse")
 
-(test-section "reverse-")
-
-(test* "" (list 3 2 1) (reverse- (list 1 2 3)))
-(test* "" (list 1) (reverse- (list 1)))
-(test* "" (list) (reverse- (list)))
+(test* "" (list 3 2 1) (my-reverse (list 1 2 3)))
+(test* "" (list 1) (my-reverse (list 1)))
+(test* "" nil (my-reverse nil))
 
 (define (my-reverse items)
   (define (flatten l i)
@@ -65,7 +73,7 @@
 (define (first-denomination coin-values)
   (car coin-values))
 
-(define us-coins (list 1 5 50 25 10))
+(define us-coins (list 1 5 10 25 50))
 
 (define uk-coins (list 100 50 20 10 5 2 1 0.5))
 
@@ -81,6 +89,29 @@
 (test-section "cc")
 
 (test* "" 292 (cc 100 us-coins))
+
+;; old version
+
+(define (count-change amount)
+  (cc-old amount 5))
+
+(define (first-denomination-old kinds-of-coins)
+  (cond ((= kinds-of-coins 1) 1)
+        ((= kinds-of-coins 2) 5)
+        ((= kinds-of-coins 3) 10)
+        ((= kinds-of-coins 4) 25)
+        ((= kinds-of-coins 5) 50)))
+
+(define (cc-old amount kinds-of-coins)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (= kinds-of-coins 0)) 0)
+        (else (+ (cc-old amount (- kinds-of-coins 1))
+                 (cc-old (- amount (first-denomination-old kinds-of-coins))
+                         kinds-of-coins)))))
+
+(test-section "cc-old")
+
+(test* "1" 292 (count-change 100))
 
 
 ;; 練習問題 2.20
@@ -391,4 +422,131 @@
        #t
        (balanced? test-b))
 
+;; 2.30
+
+(define (square x)
+  (* x x))
+
+(define (square-tree1 tree)
+  (cond ((null? tree) '())
+        ((not (pair? tree)) (square tree))
+        (else (cons (square-tree1 (car tree)) (square-tree1 (cdr tree))))))
+
+(define (square-tree2 tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (square-tree2 sub-tree)
+             (square sub-tree)))
+       tree))
+
+(test-section "square-tree")
+
+(test* "square-tree1" '(1 (4 (9 16) 25) (36 49)) (square-tree1 '(1 (2 (3 4) 5) (6 7))))
+(test* "square-tree2" '(1 (4 (9 16) 25) (36 49)) (square-tree2 '(1 (2 (3 4) 5) (6 7))))
+
+;; 練習問題 2.31
+
+(define (tree-map proc tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (tree-map proc sub-tree)
+             (proc sub-tree)))
+       tree))
+
+(define (square-tree3 tree)
+  (tree-map square tree))
+
+(test* "square-tree3" '(1 (4 (9 16) 25) (36 49)) (square-tree3 '(1 (2 (3 4) 5) (6 7))))
+
+;; 練習問題 2.32
+
+(define (subsets s)
+  (if (null? s)
+      (list '())
+      (let ((rest (subsets (cdr s))))
+        (append rest (map (lambda (e) (cons (car s) e))
+                          rest)))))
+
+(test-section "2.32")
+
+(test* "" '(() (3) (2) (2 3) (1) (1 3) (1 2) (1 2 3)) (subsets '(1 2 3)))
+(test* "" '(() (2) (1) (1 2)) (subsets '(1 2)))
+
+;; rest の定義時に subsets は繰り返し呼ばれる。s が '() であるとき (subsets s) は '(()) になる。
+;; ここから s が (3) の時の rest は '(()) となり、map で (car s) つまり 3 を rest の各要素に cons するとここでは (3) ができ、(append '(()) ((3))) となり '(() (3)) ができる。これが s が (2 3) であるときの rest に束縛される。そうなると map によって生成されるリストは rest のそれぞれの要素に 2 が cons されたものなので、'((2) (2 3)) よってここでの結果は '(() (3) (2) (2 3)) となるので、あとは 1 が追加されたものができ、 (() (3) (2) (2 3) (1) (1 3) (1 2) (1 2 3)) となる。
+
+;; 2017/10/6
+
+(define (filter predicate sequence)
+  (cond ((null? sequence)
+         nil)
+        ((predicate (car sequence))
+         (cons (car sequence)
+               (filter predicate (cdr sequence))))
+        (else
+         (filter predicate (cdr sequence)))))
+
+;; 右結合
+;; (accumulate + 0 '(1 2 3 4))
+;; ↓
+;; (+ 1 (+ 2 (+ 3 (+ 4 0))))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
+
+(define (enumerate-interval low high)
+  (if (> low high)
+      nil
+      (cons low (enumerate-interval (+ low 1) high))))
+
+(test* "" '(2 3 4 5 6 7) (enumerate-interval 2 7))
+
+(define (enumerate-tree tree)
+  (cond ((null? tree)
+         nil)
+        ((not (pair? tree))
+         (list tree))
+        (else (append (enumerate-tree (car tree)) (enumerate-tree (cdr tree))))))
+
+(test* "" '(1 2 3 4 5) (enumerate-tree (list 1 (list 2 (list 3 4)) 5)))
+
+(define (sum-odd-squares tree)
+  (accumulate + 0 (map square (filter odd? (enumerate-tree tree)))))
+
+(define (even-fibs n)
+  (accumulate cons nil (filter even? (map fib (enumerate-interval 0 n)))))
+
+(define (list-fib-squares n)
+  (accumulate cons nil (map square (map fib (enumerate-interval 0 n)))))
+
+(define (product-of-squares-of-odd-elements sequence)
+  (accumulate * 1 (map square (filter odd? sequence))))
+
+(test* "" 225 (product-of-squares-of-odd-elements (list 1 2 3 4 5)))
+
+;; ex 2.33
+
+(define (my-map p sequence)
+  (accumulate (lambda (x y) (cons (p x) y)) nil sequence))
+
+(test-section "ex 2.33")
+(test* "my-map1" '(2 4 6) (my-map (^[x] (* x 2)) '(1 2 3)))
+(test* "my-map1" '(1 1 1) (my-map (^[x] 1) '(3 9 28)))
+
+(define (my-append seq1 seq2)
+  (accumulate cons seq2 seq1))
+
+(test* "my-append1" '(1 2 3 4 5 6) (my-append '(1 2 3) '(4 5 6)))
+(test* "my-append2" '(1 2 3) (my-append nil '(1 2 3)))
+(test* "my-append3" '(1 2 3) (my-append '(1 2 3) nil))
+
+(define (my-length sequence)
+  (accumulate (^[x y] (+ 1 y)) 0 sequence))
+
+(test* "my-length1" 3 (my-length '(1 2 3)))
+(test* "my-length2" 0 (my-length nil))
+(test* "my-length3" 5 (my-length '(3 6 9 12 15)))
 
