@@ -135,12 +135,12 @@
       (get-evens nums)
       (get-odds nums)))
 
-(test-section "same-parity")
+(test-section "ex 2.20")
 
-(test* "" (list 1) (same-parity 1))
-(test* "" (list 2) (same-parity 2))
-(test* "" (list 2 4 6) (same-parity 2 3 4 5 6))
-(test* "" (list 1 3 5) (same-parity 1 2 3 4 5 6))
+(test* "same-parity1" (list 1) (same-parity 1))
+(test* "same-parity2" (list 2) (same-parity 2))
+(test* "same-parity3" (list 2 4 6) (same-parity 2 3 4 5 6))
+(test* "same-parity4" (list 1 3 5) (same-parity 1 2 3 4 5 6))
 
 ;; 練習問題 2.21
 
@@ -151,15 +151,15 @@
             (square-list1 (cdr items)))))
 
 (define (square-list2 items)
-  (map (lambda (x) (* x x)) items))
+  (map (^x (* x x)) items))
 
-(test-section "square-list")
+(test-section "ex 2.21")
 
-(test* "" (list 1 4 9) (square-list1 '(1 2 3)))
-(test* "" (list 1 1 1) (square-list1 '(1 1 1)))
+(test* "square-list1.1" (list 1 4 9) (square-list1 '(1 2 3)))
+(test* "square-list1.2" (list 1 1 1) (square-list1 '(1 1 1)))
 
-(test* "" (list 1 4 9) (square-list2 '(1 2 3)))
-(test* "" (list 1 1 1) (square-list2 '(1 1 1)))
+(test* "square-list2.1" (list 1 4 9) (square-list2 '(1 2 3)))
+(test* "square-list2.2" (list 1 1 1) (square-list2 '(1 1 1)))
 
 ;; 練習問題 2.22
 
@@ -178,14 +178,14 @@
 ;;     (if (null? things)
 ;;         answer
 ;;         (iter (cdr things) (cons answer (square (car things))))))
-;;   (iter items '()))
+;;   (iter items nil))
 
 (define (square-list-3 items)
   (define (iter things answer)
     (if (null? things)
         answer
         (iter (cdr things) (append answer (list (square (car things)))))))
-  (iter items '()))
+  (iter items nil))
 
 ;; こちらも answer の変化の推移を追っていくとわかるが、nil -> (nil . 1) -> ((nil . 1) . 4) というようになるためである。
 
@@ -195,9 +195,10 @@
   (define (proc-iter l)
     (proc (car l))
     (my-for-each proc (cdr l)))
-  (if (null? lis)
-      1
+  (if (not (null? lis))
       (proc-iter lis)))
+
+;;
 
 (define (count-leaves x)
   (cond ((null? x) 0)
@@ -206,11 +207,20 @@
 
 ;; 練習問題 2.24
 
-(list 1 (list 2 (list 3 4)))
+;; (list 1 (list 2 (list 3 4)))
+
+(cons 1
+      (cons (cons 2
+                  (cons (cons 3
+                              (cons 4 nil))
+                        nil))
+            nil))
+
+(test* "" (list 1 (list 2 (list 3 4))) (cons 1 (cons (cons 2 (cons (cons 3 (cons 4 nil)) nil)) nil)))
 
 ;; 練習問題 2.25
 
-(test-section "2.25")
+(test-section "ex 2.25")
 
 (test* "" 7 (car (cdaddr '(1 3 (5 7) 9))))
 (test* "" 7 (caar '((7))))
@@ -221,7 +231,7 @@
 (define x (list 1 2 3))
 (define y (list 4 5 6))
 
-(test-section "2.26")
+(test-section "ex 2.26")
 
 (test* "" '(1 2 3 4 5 6) (append x y))
 (test* "" '((1 2 3) 4 5 6) (cons x y))
@@ -229,34 +239,30 @@
 
 ;; 練習問題 2.27
 
-;; (define (my-reverse lis)
-(define (%reverse lis acm)
-  (if (null? lis)
-      acm
-      (%reverse (cdr lis) (cons (car lis) acm))))
-;;   (%reverse lis (list)))
-
-(define (deep-reverse lis)
-  (define (%reverse lis acm)
+(define (my-reverse lis)
+  (define (iter lis acm)
     (if (null? lis)
         acm
-        (%reverse (cdr lis) (cons (car lis) acm))))
+        (iter (cdr lis) (cons (car lis) acm))))
+  (iter lis nil))
+
+(define (deep-reverse lis)
   (if (not (pair? lis))
       lis
-      (map deep-reverse (%reverse lis '()))))
+      (map deep-reverse (my-reverse lis))))
 
-(test-section "2.27")
+(test-section "ex 2.27")
 
-(test* "" '(1) (deep-reverse '(1)))
-(test* "" '(3 2 1) (deep-reverse '(1 2 3)))
-(test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
-(test* "" '((1 2) ((4 3) (2 1))) (deep-reverse '(((1 2) (3 4)) (2 1))))
+(test* "deep-reverse1" '(1) (deep-reverse '(1)))
+(test* "deep-reverse2" '(3 2 1) (deep-reverse '(1 2 3)))
+(test* "deep-reverse3" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
+(test* "deep-reverse4" '((1 2) ((4 3) (2 1))) (deep-reverse '(((1 2) (3 4)) (2 1))))
 
-(test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
-(test* "" '((4 (3 2)) 1) (deep-reverse '(1 ((2 3) 4))))
+(test* "deep-reverse5" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
+(test* "deep-reverse6" '((4 (3 2)) 1) (deep-reverse '(1 ((2 3) 4))))
 
-(test* "" '((2 1)) (deep-reverse '((1 2))))
-(test* "" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
+(test* "deep-reverse7" '((2 1)) (deep-reverse '((1 2))))
+(test* "deep-reverse8" '((4 3) (2 1)) (deep-reverse '((1 2) (3 4))))
 
 ;; 練習問題 2.28
 
@@ -267,12 +273,12 @@
          (cons (car tree) (fringe (cdr tree))))
         (else (append (fringe (car tree)) (fringe (cdr tree))))))
 
-(test-section "fringe")
+(test-section "ex 2.28")
 
-(test* "" '(1 2 3 4 5) (fringe '(1 2 (3) 4 5)))
-(test* "" '(1 2 3 4 5) (fringe '((1) (2) (3) (4) (5))))
-(test* "" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
-(test* "" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
+(test* "fringe1" '(1 2 3 4 5) (fringe '(1 2 (3) 4 5)))
+(test* "fringe2" '(1 2 3 4 5) (fringe '((1) (2) (3) (4) (5))))
+(test* "fringe3" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
+(test* "fringe4" '(1 2 3 4 5) (fringe '(1 (2 (3) 4) 5)))
 
 ;; 練習問題 2.29
 
@@ -294,6 +300,14 @@
 (define (branch-structure branch)
   (cadr branch))
 
+(test-section "ex 2.29")
+
+(test* "left-branch" '(1 2 3) (left-branch (make-mobile '(1 2 3) '(4 5 6))))
+(test* "right-branch" '(4 5 6) (right-branch (make-mobile '(1 2 3) '(4 5 6))))
+
+(test* "branch-length" 3 (branch-length (make-branch 3 '(4 5 6))))
+(test* "branch-structure" '(4 5 6) (branch-structure (make-branch 3 '(4 5 6))))
+
 ;; b
 
 (define (total-weight mobile)
@@ -302,61 +316,46 @@
          (total-weight (branch-structure (right-branch mobile))))
       mobile))
 
-;; c
-
-(define (get-torque branch)
-  (* (branch-length branch) (total-weight (branch-structure branch))))
-
-(define (balanced? mobile)
-  (= (get-torque (left-branch mobile)) (get-torque (right-branch mobile))))
-
-;; d
-;; 以下のように関数を変えてもテストはうまくいくので大丈夫っぽい
-
-;; (define (make-mobile left right)
-;;   (cons left right))
-
-;; (define (make-branch length structure)
-;;   (cons length structure))
-
-;; (define (right-branch mobile)
-;;   (cdr mobile))
-
-;; (define (branch-structure branch)
-;;   (cdr branch))
-
-(test-section "2.29")
-
-(test* "left-branch" '(1 2 3) (left-branch (make-mobile '(1 2 3) '(4 5 6))))
-(test* "right-branch" '(4 5 6) (right-branch (make-mobile '(1 2 3) '(4 5 6))))
-
-(test* "branch-length" 3 (branch-length (make-branch 3 '(4 5 6))))
-(test* "branch-structure" '(4 5 6) (branch-structure (make-branch 3 '(4 5 6))))
-
 (test* "total-weight" 5
        (total-weight (make-mobile (make-branch 2 2) (make-branch 3 3))))
 
 (test* "total-weight" 7
-       (total-weight (make-mobile (make-branch 2
-                                               (make-mobile (make-branch 1 2)
-                                                            (make-branch 1 2)))
+       (total-weight (make-mobile (make-branch 2 (make-mobile (make-branch 1 2)
+                                                              (make-branch 1 2)))
                                   (make-branch 3 3))))
 
 (test* "total-weight"
        15
-       (total-weight (make-mobile
-                      (make-branch 3
-                                   (make-mobile
-                                    (make-branch 2 5)
-                                    (make-branch 1 5)))
-                      (make-branch 3 5))))
+       (total-weight (make-mobile (make-branch 3
+                                               (make-mobile (make-branch 2 5)
+                                                            (make-branch 1 5)))
+                                  (make-branch 3 5))))
 
-(test* "get-torque"
-       35
-       (get-torque (make-mobile 7
-                                (make-mobile
-                                 (make-branch 2 2)
-                                 (make-branch 3 3)))))
+;; c
+;; branch を受けとって紐の長さと総重量の積を取る。
+(define (get-torque branch)
+  (* (branch-length branch) (total-weight (branch-structure branch))))
+
+;; 左右の
+(define (balanced? mobile)
+  (= (get-torque (left-branch mobile)) (get-torque (right-branch mobile))))
+
+;;   |
+;; -----
+;; |   |
+;; |   |
+;; 2   |
+;;     3
+(test* "get-torque1"
+       5
+       (get-torque (make-branch 1
+                                (make-mobile (make-branch 2 2)
+                                             (make-branch 3 3)))))
+
+(test* "balanced?1"
+       #f
+       (balanced? (make-mobile (make-branch 2 2)
+                               (make-branch 3 3))))
 
 (test* "get-torque"
        14
@@ -422,24 +421,64 @@
        #t
        (balanced? test-b))
 
+;; d
+;; 以下のように関数を変えてもテストはうまくいくので大丈夫っぽい
+
+(define (make-mobile left right)
+  (cons left right))
+
+(define (make-branch length structure)
+  (cons length structure))
+
+(define (right-branch mobile)
+  (cdr mobile))
+
+(define (branch-structure branch)
+  (cdr branch))
+
+(test* "total-weight-d" 5
+       (total-weight (make-mobile (make-branch 2 2) (make-branch 3 3))))
+
+(test* "total-weight-d"
+       15
+       (total-weight (make-mobile (make-branch 3
+                                               (make-mobile (make-branch 2 5)
+                                                            (make-branch 1 5)))
+                                  (make-branch 3 5))))
+
+(test* "get-torque1-d"
+       5
+       (get-torque (make-branch 1
+                                (make-mobile (make-branch 2 2)
+                                             (make-branch 3 3)))))
+(test* "get-torque2-d"
+       14
+       (get-torque (make-branch 2
+                                (make-mobile
+                                 (make-branch 2
+                                              (make-mobile
+                                               (make-branch 1 2)
+                                               (make-branch 1 2)))
+                                 (make-branch 3 3)))))
+
 ;; 2.30
 
 (define (square x)
   (* x x))
 
+;; 高階関数を使わない版
 (define (square-tree1 tree)
   (cond ((null? tree) '())
         ((not (pair? tree)) (square tree))
         (else (cons (square-tree1 (car tree)) (square-tree1 (cdr tree))))))
 
+;; 使う版
 (define (square-tree2 tree)
   (map (lambda (sub-tree)
-         (if (pair? sub-tree)
-             (square-tree2 sub-tree)
-             (square sub-tree)))
+         (if (pair? sub-tree) (square-tree2 sub-tree) (square sub-tree)))
        tree))
 
-(test-section "square-tree")
+(test-section "ex 2.30")
 
 (test* "square-tree1" '(1 (4 (9 16) 25) (36 49)) (square-tree1 '(1 (2 (3 4) 5) (6 7))))
 (test* "square-tree2" '(1 (4 (9 16) 25) (36 49)) (square-tree2 '(1 (2 (3 4) 5) (6 7))))
@@ -456,13 +495,16 @@
 (define (square-tree3 tree)
   (tree-map square tree))
 
-(test* "square-tree3" '(1 (4 (9 16) 25) (36 49)) (square-tree3 '(1 (2 (3 4) 5) (6 7))))
+(test-section "ex 2.31")
+
+(test* "square-tree3.a" '(1 (4 (9 16) 25) (36 49)) (square-tree3 '(1 (2 (3 4) 5) (6 7))))
+(test* "square-tree3.b" (square-tree1 '(1 (2 (3 4) 5) (6 7))) (square-tree3 '(1 (2 (3 4) 5) (6 7))))
 
 ;; 練習問題 2.32
 
 (define (subsets s)
   (if (null? s)
-      (list '())
+      (list nil)
       (let ((rest (subsets (cdr s))))
         (append rest (map (lambda (e) (cons (car s) e))
                           rest)))))
@@ -585,5 +627,26 @@
 
 ;; ex 2.37
 
+(test-section "ex 2.37")
+
 (define (dot-product v w)
   (accumulate + 0 (map * v w)))
+
+(test* "dot-product" 26 (dot-product '(1 2 3) '(3 4 5)))
+
+(define (matrix-*-vector m v)
+  (map (^[mc] (dot-product mc v)) m))
+
+(test* "matrix-*-vector" '(14 32 50) (matrix-*-vector '((1 2 3) (4 5 6) (7 8 9)) '(1 2 3)))
+
+(define (transpose mat)
+  (accumulate-n cons nil mat))
+
+(test* "transpose" '((1 4 7) (2 5 8) (3 6 9)) (transpose '((1 2 3) (4 5 6) (7 8 9))))
+
+(define (matrix-*-matrix m n)
+  (let ((cols (transpose n)))
+    (map (^[mc] (matrix-*-vector cols mc)) m)))
+
+(test* "matrix-*-matrix" '((9 12) (24 33)) (matrix-*-matrix '((1 2) (4 5)) '((1 2) (4 5))))
+
