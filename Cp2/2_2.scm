@@ -652,7 +652,7 @@
 
 
 ;; 2017/12/7
-;; ex 2.37
+;; ex 2.38
 
 (define (foldl op initial sequence)
   (define (iter result rest)
@@ -673,4 +673,20 @@
 (test* "foldl2" (list (list (list nil 1) 2) 3) (fold-left list nil (list 1 2 3)))
 
 ;; op が可換であること
+
+;; ex 2.39
+
+(define (reverse-r sequence)
+  (fold-right (lambda (x y) (append y (list x))) nil sequence))
+
+(define (reverse-l sequence)
+  (fold-left (lambda (x y) (append (list y) x)) nil sequence))
+
+(test-section "ex 2.38")
+
+(test* "reverse-r" '(3 2 1) (reverse-r '(1 2 3)))
+(test* "reverse-l" '(3 2 1) (reverse-l '(1 2 3)))
+
+
+
 
