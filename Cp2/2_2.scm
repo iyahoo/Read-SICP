@@ -650,3 +650,27 @@
 
 (test* "matrix-*-matrix" '((9 12) (24 33)) (matrix-*-matrix '((1 2) (4 5)) '((1 2) (4 5))))
 
+
+;; 2017/12/7
+;; ex 2.37
+
+(define (foldl op initial sequence)
+  (define (iter result rest)
+    (if (null? rest)
+        result
+        (iter (op result (car rest)) (cdr rest))))
+  (iter initial sequence))
+
+(define foldr accumulate)
+
+(test-section "ex 2.37")
+
+(test* "foldr1" 3/2 (foldr / 1 (list 1 2 3)))
+(test* "foldl1" 1/6  (foldl / 1 (list 1 2 3)))
+;; '(1 (2 (3 nil)))
+(test* "foldr2" (list 1 (list 2 (list 3 nil))) (foldr list nil (list 1 2 3)))
+;; '(((nil 1) 2) 3)
+(test* "foldl2" (list (list (list nil 1) 2) 3) (fold-left list nil (list 1 2 3)))
+
+;; op が可換であること
+
