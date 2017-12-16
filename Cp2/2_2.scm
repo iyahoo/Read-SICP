@@ -606,21 +606,41 @@
 
 ;; ex 2.35
 
-(test-section "ex 2.35")
-
 (define (count-leaves-acc t)
   (accumulate + 0 (map (^[x] 1) (enumerate-tree t))))
+
+(define (depth-hima l)
+ (if (null? l)
+     0
+     (if (number? l)
+         1
+         (+ (depth-hima (car l))
+            (depth-hima (cdr l))))))
+
+(define (count-leaves-acc-hima t)
+  (accumulate + 0 (map depth-hima t)))
+
+(test-section "ex 2.35")
 
 (test* "count-leaves1" 4 (count-leaves-acc (cons (list 1 2) (list 3 4))))
 (test* "count-leaves2" 8 (count-leaves-acc (list (cons (list 1 2) (list 3 4))
                                                  (cons (list 1 2) (list 3 4)))))
+(test* "count-leaves3" 14 (count-leaves-acc (list (list (list 1 2) (list 1 2) (list 1 2) (list 1 2))
+                                                  (list 1 2) (list 1 2) (list 1 2))))
+
+(test* "count-leaves1" 4 (count-leaves-acc-hima (cons (list 1 2) (list 3 4))))
+(test* "count-leaves2" 8 (count-leaves-acc-hima (list (cons (list 1 2) (list 3 4))
+                                                      (cons (list 1 2) (list 3 4)))))
+(test* "count-leaves3" 14 (count-leaves-acc-hima (list (list (list 1 2) (list 1 2) (list 1 2) (list 1 2))
+                                                       (list 1 2) (list 1 2) (list 1 2))))
+
 
 ;; ex 2.36
 
 (define (accumulate-n op init seqs)
   (if (null? (car seqs))
       nil
-      (cons (accumulate op init (map car seqs))
+      (cons (accumulate   op init (map car seqs))
             (accumulate-n op init (map cdr seqs)))))
 
 (test* "accumulate-n" '(22 26 30) (accumulate-n + 0 '((1 2 3) (4 5 6) (7 8 9) (10 11 12))))
@@ -670,23 +690,22 @@
 ;; '(1 (2 (3 nil)))
 (test* "foldr2" (list 1 (list 2 (list 3 nil))) (foldr list nil (list 1 2 3)))
 ;; '(((nil 1) 2) 3)
-(test* "foldl2" (list (list (list nil 1) 2) 3) (fold-left list nil (list 1 2 3)))
+(test* "foldl2" (list (list (list nil 1) 2) 3) (foldl list nil (list 1 2 3)))
 
 ;; op が可換であること
 
 ;; ex 2.39
 
 (define (reverse-r sequence)
-  (fold-right (lambda (x y) (append y (list x))) nil sequence))
+  (foldr (lambda (x y) (append y (list x))) nil sequence))
 
 (define (reverse-l sequence)
-  (fold-left (lambda (x y) (append (list y) x)) nil sequence))
+  (foldl (lambda (x y) (cons y x)) nil sequence))
 
 (test-section "ex 2.38")
 
 (test* "reverse-r" '(3 2 1) (reverse-r '(1 2 3)))
 (test* "reverse-l" '(3 2 1) (reverse-l '(1 2 3)))
 
-
-
+;; 
 
