@@ -1,3 +1,7 @@
+;; File 2_2.scm
+(define-module sicp.2.2
+  (export-all))
+
 (use gauche.test)
 
 (define nil '())
@@ -707,5 +711,144 @@
 (test* "reverse-r" '(3 2 1) (reverse-r '(1 2 3)))
 (test* "reverse-l" '(3 2 1) (reverse-l '(1 2 3)))
 
-;; 
+;;
 
+(use math.prime)
+
+(define prime? small-prime?)
+
+(define (flatmap proc seq)
+  (accumulate append nil (map proc seq)))
+
+(define (prime-sum? pair)
+  (prime? (+ (car pair) (cadr pair))))
+
+(define (make-pair-sum pair)
+  (list (car pair) (cadr pair) (+ (car pair) (cadr pair))))
+
+(define (prime-sum-pairs n)
+  (map make-pair-sum
+       (filter prime-sum?
+               (flatmap (lambda (i)
+                          (map (lambda (j) (list i j))
+                               (enumerate-interval 1 (- i 1))))
+                        (enumerate-interval 1 n)))))
+
+(define (new-remove item sequence)
+  (filter (lambda (x) (not (= x item))) sequence))
+
+(define (permutations s)
+  (if (null? s) ; 集合は空か?
+      (list nil) ; 空集合を持つ列
+      (flatmap (^[x]
+                 (map (^[p] (cons x p))
+                      (permutations (new-remove x s))))
+               s)))
+
+;; ex 2.40
+
+(define (unique-pairs n)
+  (flatmap (lambda (i)
+             (map (lambda (j) (list i j))
+                  (enumerate-interval 1 (- i 1))))
+           (enumerate-interval 1 n)))
+
+(define (prime-sum-pairs2 n)
+  (map make-pair-sum
+       (filter prime-sum?
+               (unique-pairs n))))
+
+(test-section "ex 2.40")
+
+(test* "prime-sum-pairs" (prime-sum-pairs 5) (prime-sum-pairs2 5))
+
+;; ex 2.41
+
+(define (unique-triples n)
+  (flatmap (^[i] (flatmap (^[j] (map (^[k] (list i j k))
+                                     (enumerate-interval 1 (- j 1))))
+                          (enumerate-interval 1 (- i 1))))
+           (enumerate-interval 1 n)))
+
+(test-section "ex 2.41")
+
+(test* "unique-triples1" '((3 2 1)) (unique-triples 3))
+(test* "unique-triples2" '((3 2 1) (4 2 1) (4 3 1) (4 3 2)) (unique-triples 4))
+(test* "unique-triples3" '((3 2 1) (4 2 1) (4 3 1) (4 3 2) (5 2 1) (5 3 1) (5 3 2) (5 4 1) (5 4 2) (5 4 3)) (unique-triples 5))
+
+(define (sum-is-s? triple s)
+  (= s (apply + triple)))
+
+(define (s-sum-triples n s)
+  (filter (^[t] (sum-is-s? t s))
+          (unique-triples n)))
+
+(test* "unique-triples" '((4 3 1) (5 2 1)) (s-sum-triples 5 8))
+
+;; ex 2.42
+
+(define empty-board '())
+
+(define (adjoin-position new-row k rest-of-queens)
+  (append rest-of-queens (list (cons new-row k))))
+
+(define (same-row? a b)
+  (= (car a) (car b)))
+
+(define (same-col? a b)
+  (= (cdr a) (cdr b)))
+
+(define (same-diagonal? a b)
+  (= (+ (car a) (cdr a)) (+ (car b) (cdr b))))
+
+(define (same-anti-diagonal? a b)
+  (= (- (car a) (cdr a)) (- (car b) (cdr b))))
+
+(define (hit? a b)
+  (or (same-row? a b) (same-col? a b)
+      (same-diagonal? a b) (same-anti-diagonal? a b)))
+
+(define (safe? k positions)
+  (let ([kth-queen (ref positions (- k 1))]
+        [rest-queen (cdr (reverse positions))])
+    (not (reduce (^[a b] (or a b)) #f
+                 (map (^[a-queen] (hit? kth-queen a-queen))
+                      rest-queen)))))
+
+(define (queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (list empty-board)
+        (filter (^[positions] (safe? k positions))
+                (flatmap (^[rest-of-queens]
+                           (map (^[new-row]
+                                  (adjoin-position new-row k rest-of-queens))
+                                (enumerate-interval 1 board-size)))
+                         (queen-cols (- k 1))))))
+  (queen-cols board-size))
+
+(test-section "ex ex 2.42")
+
+(test* "adjoin-position" '((1 . 1) (3 . 2) (2 . 3))
+       (adjoin-position 2 3 '((1 . 1) (3 . 2))))
+(test* "same-row?" #t
+       (same-row? '(1 . 1) '(1 . 2)))
+(test* "same-row?" #f
+       (same-row? '(2 . 1) '(1 . 2)))
+(test* "same-col?" #t
+       (same-col? '(1 . 1) '(2 . 1)))
+(test* "same-diagonal?" #t
+       (same-diagonal? '(2 . 2) '(3 . 1)))
+(test* "same-anti-diagonal?" #t
+       (same-anti-diagonal? '(2 . 2) '(3 . 3)))
+(test* "safe?" #t
+       (safe? 1 '((1 . 1))))
+(test* "safe?" #t
+       (safe? 4 '((2 . 1) (4 . 2) (1 . 3) (3 . 4))))
+
+;; P134 の例 (row(行), col(列))
+(define sample-ans-queen
+  '((3 . 1) (7 . 2) (2 . 3) (8 . 4) (5 . 5) (1 . 6) (4 . 7) (6 . 8)))
+
+(test* "queens" #t
+       (not (null? (member sample-ans-queen (queens 8)))))
