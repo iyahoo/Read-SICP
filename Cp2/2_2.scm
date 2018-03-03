@@ -614,12 +614,12 @@
   (accumulate + 0 (map (^[x] 1) (enumerate-tree t))))
 
 (define (depth-hima l)
- (if (null? l)
-     0
-     (if (number? l)
-         1
-         (+ (depth-hima (car l))
-            (depth-hima (cdr l))))))
+  (if (null? l)
+      0
+      (if (number? l)
+          1
+          (+ (depth-hima (car l))
+             (depth-hima (cdr l))))))
 
 (define (count-leaves-acc-hima t)
   (accumulate + 0 (map depth-hima t)))
@@ -817,6 +817,7 @@
 
 (define (queens board-size)
   (define (queen-cols k)
+    ;;(print "hotte")
     (if (= k 0)
         (list empty-board)
         (filter (^[positions] (safe? k positions))
@@ -852,3 +853,39 @@
 
 (test* "queens" #t
        (not (null? (member sample-ans-queen (queens 8)))))
+
+;; ex 2.43
+
+(use gauche.time)
+
+(define (slow-queens board-size)
+  (define (queen-cols k)
+    (if (= k 0)
+        (begin (print "hogee")
+               (list empty-board))
+        (filter (^[positions] (safe? k positions))
+                (flatmap (lambda (new-row)
+                           (map (lambda (rest-of-queens)
+                                  (adjoin-position new-row k rest-of-queens))
+                                (queen-cols (- k 1))))
+                         (enumerate-interval 1 board-size)))))
+  (queen-cols board-size))
+
+;; Queen-cols が呼ばれる回数？
+;; 通常の queens は queen
+;;
+
+;; k = 1 := 1
+;; k = 2 := 6
+;; k = 3 := 39
+;; k = 4 := 340
+;; k = 5 := 3905
+
+;; http://community.schemewiki.org/?sicp-ex-2.43
+;; これによると `board-size ^ board-size` で、直感的には正しそうなのだが、実際に `queen-cols` が呼ばれる回数と一致しない
+
+;; リスト (enumerate-interval 1 board-size) のサイズ分 (queen-cols k)
+
+
+
+
