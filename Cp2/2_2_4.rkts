@@ -113,15 +113,111 @@
 (define (ycor-vect2 vect)
   (cdr vect))
 
-(define (add-vect v1 v2)
+(define (add-vect2 v1 v2)
   (make-vect2 (+ (xcor-vect2 v1) (xcor-vect2 v2))
               (+ (ycor-vect2 v1) (ycor-vect2 v2))))
 
-(define (sub-vect v1 v2)
+(define (sub-vect2 v1 v2)
   (make-vect2 (- (xcor-vect2 v1) (xcor-vect2 v2))
               (- (ycor-vect2 v1) (ycor-vect2 v2))))
 
-(define (scale-vect t v)
+(define (scale-vect2 t v)
   (make-vect2 (* t (xcor-vect2 v))
               (* t (ycor-vect2 v))))
 
+
+(require rackunit)
+
+(check-equal? (make-vect2 2 3)
+              '(2 . 3))
+
+(check-equal? (xcor-vect2 (make-vect2 2 3))
+              2)
+
+(check-equal? (ycor-vect2 (make-vect2 2 3))
+              3)
+
+(check-equal? (add-vect2 (make-vect2 3.0 4.0)
+                         (make-vect2 1.0 2.0))
+              '(4.0 . 6.0))
+
+(check-equal? (sub-vect2 (make-vect2 3.0 4.0)
+                         (make-vect2 1.0 2.0))
+              '(2.0 . 2.0))
+
+(check-equal? (scale-vect2 3.0 (make-vect2 1.0 2.0))
+              '(3.0 . 6.0))
+
+(check-equal?
+ (add-vect2 (make-vect2 2 3) (make-vect2 3 4))
+ (make-vect2 5 7))
+
+(check-equal?
+ (sub-vect2 (make-vect2 2 3) (make-vect2 3 4))
+ (make-vect2 -1 -1))
+
+(check-equal?
+ (scale-vect2 2 (make-vect2 3 4))
+ (make-vect2 6 8))
+
+(define (make-frame2 origin edge1 edge2)
+  (list origin edge1 edge2))
+
+(define (origin-frame2 frame)
+  (first frame))
+
+(define (edge1-frame2 frame)
+  (second frame))
+
+(define (edge2-frame2 frame)
+  (third frame))
+
+(let ((frame (make-frame2 (make-vect2 0.0 0.0)
+                          (make-vect2 2.0 0.0)
+                          (make-vect2 0.0 2.0))))
+  (check-equal?
+   (origin-frame2 frame)
+   (make-vect2 0.0 0.0))
+
+  (check-equal?
+   (edge1-frame2 frame)
+   (make-vect2 2.0 0.0))
+
+  (check-equal?
+   (edge2-frame2 frame)
+   (make-vect2 0.0 2.0)))
+
+(define (make-frame3 origin edge1 edge2)
+  (cons origin (cons edge1 edge2)))
+
+(define (origin-frame3 frame)
+  (car frame))
+
+(define (edge1-frame3 frame)
+  (cadr frame))
+
+(define (edge2-frame3 frame)
+  (cddr frame))
+
+(let ((frame (make-frame3 (make-vect2 0.0 0.0)
+                          (make-vect2 2.0 0.0)
+                          (make-vect2 0.0 2.0))))
+  (check-equal?
+   (origin-frame3 frame)
+   (make-vect2 0.0 0.0))
+
+  (check-equal?
+   (edge1-frame3 frame)
+   (make-vect2 2.0 0.0))
+
+  (check-equal?
+   (edge2-frame3 frame)
+   (make-vect2 0.0 2.0)))
+
+;; (define (segments->painter segment-list)
+;;   (lambda (frame)
+;;     (for-each (lambda (segment)
+;;                 (draw-line ((frame-coord-map frame) (start-segment segment))
+;;                            ((frame-coord-map frame) (end-segment segment))))
+;;               segment-list)))
+;;
