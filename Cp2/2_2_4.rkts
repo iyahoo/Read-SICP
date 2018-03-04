@@ -30,7 +30,6 @@
 
 (define wave4 (flipped-pairs wave))
 
-
 (define (right-split painter n)
   (if (= n 0)
       painter
@@ -160,6 +159,8 @@
  (scale-vect2 2 (make-vect2 3 4))
  (make-vect2 6 8))
 
+;; ex 2.47
+
 (define (make-frame2 origin edge1 edge2)
   (list origin edge1 edge2))
 
@@ -221,3 +222,97 @@
 ;;                            ((frame-coord-map frame) (end-segment segment))))
 ;;               segment-list)))
 ;;
+
+(define (make-segment2 start end)
+  (cons start end))
+
+(define (start-segment2 seg)
+  (car seg))
+
+(define (end-segment2 seg)
+  (cdr seg))
+
+;; 2.49
+
+(define (2-49-a tl tr bl br)
+  (segments->painter
+   (list (make-segment2 tl tr)
+         (make-segment2 tr br)
+         (make-segment2 br bl)
+         (make-segment2 bl tl))))
+
+(define a (2-49-a (make-vect2 0.05 0.95)
+                  (make-vect2 0.95 0.95)
+                  (make-vect2 0.05 0.05)
+                  (make-vect2 0.95 0.05)))
+(paint a)
+
+(define (2-49-b tl br tr bl)
+  (segments->painter
+   (list (make-segment2 tl br)
+         (make-segment2 tr bl))))
+
+(define b (2-49-b (make-vect2 0.01 0.99)
+                  (make-vect2 0.99 0.01)
+                  (make-vect2 0.99 0.99)
+                  (make-vect2 0.01 0.01)))
+(paint-hires b)
+
+(define (center-vect v1 v2)
+  (make-vect2 (/ (+ (xcor-vect2 v1)
+                    (xcor-vect2 v2))
+                 2.0)
+              (/ (+ (ycor-vect2 v1)
+                    (ycor-vect2 v2))
+                 2.0)))
+
+(check-equal?
+ (center-vect (make-vect2 0.01 0.99)
+              (make-vect2 0.01 0.01))
+ '(0.01 . 0.5))
+
+(check-equal?
+ (center-vect (make-vect2 0.01 0.5)
+              (make-vect2 0.99 0.5))
+ '(0.5 . 0.5))
+
+(define (2-49-c tl tr bl br)
+  (let ([l (center-vect tl bl)]
+        [t (center-vect tl tr)]
+        [r (center-vect tr br)]
+        [b (center-vect bl br)])
+    (segments->painter
+     (list (make-segment2 l t)
+           (make-segment2 t r)
+           (make-segment2 r b)
+           (make-segment2 b l)))))
+
+(define c (2-49-c (make-vect2 0.05 0.95)
+                  (make-vect2 0.95 0.95)
+                  (make-vect2 0.05 0.05)
+                  (make-vect2 0.95 0.05)))
+
+(paint-hires c)
+
+
+(define wave-me
+  (segments->painter
+   (list (make-segment2 (make-vect2 0.2 0.0) (make-vect2 0.4 0.4))
+         (make-segment2 (make-vect2 0.4 0.4) (make-vect2 0.3 0.5))
+         (make-segment2 (make-vect2 0.3 0.5) (make-vect2 0.1 0.3))
+         (make-segment2 (make-vect2 0.1 0.3) (make-vect2 0.0 0.6))
+         (make-segment2 (make-vect2 0.0 0.8) (make-vect2 0.1 0.5))
+         (make-segment2 (make-vect2 0.1 0.5) (make-vect2 0.3 0.6))
+         (make-segment2 (make-vect2 0.3 0.6) (make-vect2 0.4 0.6))
+         (make-segment2 (make-vect2 0.4 0.6) (make-vect2 0.3 0.8))
+         (make-segment2 (make-vect2 0.3 0.8) (make-vect2 0.4 1.0))
+         (make-segment2 (make-vect2 0.6 1.0) (make-vect2 0.7 0.8))
+         (make-segment2 (make-vect2 0.7 0.8) (make-vect2 0.6 0.6))
+         (make-segment2 (make-vect2 0.6 0.6) (make-vect2 0.8 0.6))
+         (make-segment2 (make-vect2 0.8 0.6) (make-vect2 1.0 0.4))
+         (make-segment2 (make-vect2 1.0 0.2) (make-vect2 0.6 0.4))
+         (make-segment2 (make-vect2 0.6 0.4) (make-vect2 0.8 0.0))
+         (make-segment2 (make-vect2 0.7 0.0) (make-vect2 0.5 0.3))
+         (make-segment2 (make-vect2 0.5 0.3) (make-vect2 0.3 0.0)))))
+
+
