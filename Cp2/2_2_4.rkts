@@ -245,7 +245,7 @@
                   (make-vect2 0.95 0.95)
                   (make-vect2 0.05 0.05)
                   (make-vect2 0.95 0.05)))
-(paint a)
+;; (paint a)
 
 (define (2-49-b tl br tr bl)
   (segments->painter
@@ -256,7 +256,7 @@
                   (make-vect2 0.99 0.01)
                   (make-vect2 0.99 0.99)
                   (make-vect2 0.01 0.01)))
-(paint-hires b)
+;; (paint-hires b)
 
 (define (center-vect v1 v2)
   (make-vect2 (/ (+ (xcor-vect2 v1)
@@ -292,7 +292,7 @@
                   (make-vect2 0.05 0.05)
                   (make-vect2 0.95 0.05)))
 
-(paint-hires c)
+;; (paint-hires c)
 
 
 (define wave-me
@@ -314,5 +314,75 @@
          (make-segment2 (make-vect2 0.6 0.4) (make-vect2 0.8 0.0))
          (make-segment2 (make-vect2 0.7 0.0) (make-vect2 0.5 0.3))
          (make-segment2 (make-vect2 0.5 0.3) (make-vect2 0.3 0.0)))))
+
+
+(define (transform-painter2 painter origin corner1 corner2)
+  (lambda (frame)
+    (let ((m (frame-coord-map frame)))
+      (let ((new-origin (m origin)))
+        (painter (make-frame new-origin
+                             (sub-vect2 (m corner1) new-origin)
+                             (sub-vect2 (m corner2) new-origin)))))))
+
+(define (flip-vert2 painter)
+  (transform-painter2 painter
+                      (make-vect2 0.0 1.0) ; new origin
+                      (make-vect2 1.0 1.0) ; new end of edge1
+                      (make-vect2 0.0 0.0))) ; new end of edge2
+
+(define (shrink-to-upper-right painter)
+  (transform-painter2 painter
+                      (make-vect2 0.5 0.5)
+                      (make-vect2 1.0 0.5)
+                      (make-vect2 0.5 1.0)))
+
+(define (rotate90 painter)
+  (transform-painter2 painter
+                      (make-vect2 1.0 0.0)
+                      (make-vect2 1.0 1.0)
+                      (make-vect2 0.0 0.0)))
+
+(define (squash-inwards painter)
+  (transform-painter2 painter
+                      (make-vect2 0.0 0.0)
+                      (make-vect2 0.65 0.35)
+                      (make-vect2 0.35 0.65)))
+
+(define (beside2 painter1 painter2)
+  (let ((split-point (make-vect 0.5 0.0)))
+    (let ((paint-left (transform-painter2 painter1
+                                          (make-vect 0.0 0.0)
+                                          split-point
+                                          (make-vect 0.0 1.0)))
+          (paint-right (transform-painter2 painter2
+                                           split-point
+                                           (make-vect 1.0 0.0)
+                                           (make-vect 0.5 1.0))))
+      (lambda (frame)
+        (paint-left frame)
+        (paint-right frame)))))
+
+;; ex 2.50
+
+(define (flip-horiz2 painter)
+  (transform-painter2 painter
+                      (make-vect2 1.0 0.0)
+                      (make-vect2 0.0 0.0)
+                      (make-vect2 1.0 1.0)))
+
+;; (define (rotate180 painter)
+;;   (rotate90 (rotate90 painter)))
+
+(define (rotate180-2 painter)
+  (transform-painter2 painter
+                      (make-vect2 1.0 1.0)
+                      (make-vect2 0.0 1.0)
+                      (make-vect2 1.0 0.0)))
+
+(define (rotate270-2 painter)
+  (transform-painter2 painter
+                      (make-vect2 0.0 1.0)
+                      (make-vect2 0.0 0.0)
+                      (make-vect2 1.0 1.0)))
 
 
