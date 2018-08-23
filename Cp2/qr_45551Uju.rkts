@@ -1,7 +1,6 @@
 #lang racket
 
 (require (planet "sicp.ss" ("soegaard" "sicp.plt" 2 1)))
-(paint diagonal-shading)
 
 (define wave
   (segments->painter
@@ -351,14 +350,14 @@
 
 (define (beside2 painter1 painter2)
   (let ((split-point (make-vect2 0.5 0.0)))
-    (let ((paint-left (transform-painter2 painter2
+    (let ((paint-left (transform-painter2 painter1
+                                          (make-vect2 0.0 0.0)
                                           split-point
-                                          (make-vect2 1.0 0.0)
-                                          (make-vect2 0.5 1.0)))
-          (paint-right (transform-painter2 painter1
-                                           (make-vect2 0.0 0.0)
+                                          (make-vect2 0.0 1.0)))
+          (paint-right (transform-painter2 painter2
                                            split-point
-                                           (make-vect2 0.0 1.0))))
+                                           (make-vect2 1.0 0.0)
+                                           (make-vect2 0.5 1.0))))
       (lambda (frame)
         (paint-left frame)
         (paint-right frame)))))
@@ -390,11 +389,11 @@
 
 (define (below2-1 p1 p2)
   (let* ((split-point (make-vect2 0.0 0.5))
-         (paint-top (transform-painter2 p1
+         (paint-top (transform-painter2 p2
                                         (make-vect2 0.0 0.0)
                                         (make-vect2 1.0 0.0)
                                         split-point))
-         (paint-bottom (transform-painter2 p2
+         (paint-bottom (transform-painter2 p1
                                            split-point
                                            (make-vect2 1.0 0.5)
                                            (make-vect2 0.0 1.0))))
@@ -403,7 +402,7 @@
       (paint-bottom frame))))
 
 (define (below2-2 p1 p2)
-  (rotate270 (beside2 (rotate90 p2) (rotate90 p1))))
+  (rotate270 (beside2 (rotate90 p1) (rotate90 p2))))
 
 ;; ex 2.52
 ;; http://d.hatena.ne.jp/tetsu_miyagawa/20130512/1368350808
@@ -455,15 +454,14 @@
          (make-segment (make-vect 0.46 0.87) (make-vect 0.49 0.83))
          (make-segment (make-vect 0.50 0.87) (make-vect 0.49 0.83)))))
 
-(define (corner-split2 painter n)
+
+(define (corner-split3 painter n)
   (if (= n 0)
       painter
-      (let ((top-left (up-split-new painter (- n 1)))
-            (bottom-right (right-split-new painter (- n 1)))
-            (corner (corner-split2 painter (- n 1))))
-        (beside2 (below2-1 painter top-left)
-                 (below2-1 bottom-right corner)))))
-
-(define (square-limit-3 painter n)
-  (let ((combine4 (square-of-four flip-vert rotate180 identity flip-horiz)))
-    (combine4 (corner-split painter n))))
+      (let ((up (up-split-new painter (- n 1)))
+            (right (right-split-new painter (- n 1))))
+        (let ((top-left (beside2 up up))
+              (bottom-right (below2-1 right right))
+              (corner (corner-split3 painter (- n 1))))
+          (beside (below painter top-left)
+                  (below bottom-right corner))))))

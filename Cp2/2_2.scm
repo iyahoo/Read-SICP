@@ -888,4 +888,57 @@
 
 
 
+;; ex 2.53
+
+(test* "" (list 'a 'b 'c)
+       '(a b c))
+
+(test* "" (list (list 'george))
+       '((george)))
+
+(test* "" (cdr '((x1 x2) (y1 y2)))
+       '((y1 y2)))
+
+(test* "" (cadr '((x1 x2) (y1 y2)))
+       '(y1 y2))
+
+(test* "" (pair? (car '(a short list)))
+       #f)
+
+(test* "" (memq 'red '((red shoes) (blue socks)))
+       #f)
+
+(test* "" (memq 'red '(red shoes blue socks))
+       '(red shoes blue socks))
+
+;; ex 2.54
+
+(define (equal-? obj1 obj2)
+  (cond [(or (null? obj1) (null? obj2))
+         (and (null? obj1) (null? obj2))]
+        [(or (not (pair? obj1)) (not (pair? obj2)))
+         (eq? obj1 obj2)]
+        [else
+         (and (equal-? (car obj1) (car obj2))
+              (equal-? (cdr obj1) (cdr obj2)))]))
+
+(test* "" (equal? '() '()) (equal-? '() '()))
+(test* "" (equal? '(a) '()) (equal-? '(a) '()))
+(test* "" (equal? '() '(a)) (equal-? '() '(a)))
+(test* "" (equal? '(a) '(a)) (equal-? '(a) '(a)))
+(test* "" (equal? '(a b) '(a)) (equal-? '(a b) '(a)))
+(test* "" (equal? '(a b) '(a b)) (equal-? '(a b) '(a b)))
+
+(test* "" (equal? '((a)) '((a))) (equal-? '((a)) '((a))))
+(test* "" (equal? '(((a))) '((a))) (equal-? '(((a))) '((a))))
+
+(test* "" (equal? '(a b (a)) '(a b a)) (equal-? '(a b (a)) '(a b a)))
+
+(test* "" (equal? '(a b (a b)) '(a b (a b))) (equal-? '(a b (a b)) '(a b (a b))))
+
+;; ex 2.55
+
+''abracadabra
+
+(quote (quote abracadabra))
 
